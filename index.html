@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/league.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+		<style>
+			.reveal .highlight { color: #13DAEC }
+		</style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h2 class="highlight">漫谈 JavaScript</h2>
+				</section>
+				<section>
+					<h2 class="highlight">JavaScript 的实现</h2>
+					<image src="img/js.jpg"></image><br />
+					<ul>
+						<li>语法核心（ECMAScript）</li>
+						<li>文档对象模型（DOM）</li>
+						<li>浏览器对象模型（BOM）</li>
+					</ul>
+				</section>
+				<section>
+					<section>
+						<h2 class="highlight">语法特征（ECMAScript 5）</h2>
+						<h4>通过构造函数及原型继承实现类的封装</h4>
+						<pre><code>
+function People(name) {
+  this.name = name
+}
+
+var people = new People('Jack');
+
+People.prototype.sayHi = function() {
+  console.log('Hello, my name is ' + this.name)
+};
+
+people.sayHi(); // log 'Hello, my name is Jack'
+							</code></pre>
+					</section>
+					<section>
+						<h4>非常灵活，支持lambda 函数、闭包甚至元编程特性</h4>
+							<pre><code>
+var abc = (function($, window, undefined) {
+  var count = 0
+  return function() {
+    count++
+    return count
+  }
+}(jQuery, this));
+
+abc(); // 1
+abc(); // 2
+							</code></pre>			
+					</section>
+					<section>
+						<h4>没有模块化（因此没有命名空间），单线程</h4>
+							<pre><code>
+<scirpt src="jQuery.js"></scirpt>
+<scirpt src="underscore.js"></scirpt>
+<scirpt src="Backbone.js"></scirpt>
+<scirpt src="util.js"></scirpt>
+<script src="app.js"></script>
+<scirpt src="model.js"></scirpt>
+<scirpt src="view.js"></scirpt>
+							</code></pre>		
+					</section>
+				</section>
+				<section>
+          <section>
+            <h2 class="highlight">DOM && BOM</h2>
+            <h4>DOM API</h4>
+						<pre><code>
+// query
+<div id="app">
+  <p class="highlight">some text</p>
+</div>
+document.getElementsByTagName('p')[0]
+document.getElementsByClassName('highlight')[0]
+document.querySelector('#app p.highlight')
+
+// 节点关系 childNode、parentNode、nextSibling 等
+// 修改节点 appendChild、insertBefore、replaceChild 等方法
+
+							</code></pre>      
+          </section>
+          <section>
+            <h4>Event</h4>
+              <pre><code>
+document.addEventListener('click', function(e) {
+  console.log(e.target);
+  console.log(e.currentTarget);
+  e.preventDefault();
+  e.stopPropagation();
+})
+// IE8 及以下
+document.attachEvent('click', function(e) {})
+							</code></pre>
+          </section>
+          <section>
+            <h4>window、location</h4>
+          </section>
+          </ul>
+				</section>
+				<section>
+					<h2 class="highlight">jQuery</h2>
+						<h4>DOM(chainable)</h4>
+            <pre><code>
+$('p.highlight').toggleClass('highlight').append($('#app'))
+            </code></pre>
+						<h4>event</h4>
+            <pre><code>
+$('p.highlight').on('click', function() { /**/ })
+            </code></pre>
+						<h4>Utils</h4>
+						<h4>Plugins</h4>
+				</section>
+				<section>
+					<h2 class="highlight">增加结构</h2>
+				</section>
+				<section>
+					<h2 class="highlight">模块化</h2>
+				</section>
+				<section>
+					<h2 class="highlight">视图绑定</h2>
+					<ul>
+						<li>
+							Angular: dirty check
+						</li>
+						<li>
+							Vue: Object.defineProperty
+						</li>
+						<li>
+							React: Virtual DOM
+						</li>
+					</ul>
+				</section>
+				<section>
+					components
+				</section>
+				<section>
+					<ul>
+						<li>Native 混合开发：React Native | Cordova | NativeScript</li>
+						<li>跨平台桌面App 开发：Electron</li>
+						<li>游戏开发：Cocos2d js</li>
+					</ul>
+				</section>
+				<section>
+					Node.js
+					<ul>
+						<li>commonjs</li>
+						<li>package</li>
+					</ul>
+				</section>
+				<section>
+					Compile to JS
+					<ul>
+						<li>CoffeeScript</li>
+						<li>ES6</li>
+						<li>TypeScript</li>
+					</ul>
+				</section>
+				<section>
+					Thanks!
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
