@@ -31,7 +31,7 @@
 					<h2 class="highlight">漫谈 JavaScript</h2>
 				</section>
 				<section>
-					<h2 class="highlight">JavaScript 的实现</h2>
+					<h3 class="highlight">JavaScript 的实现</h3>
 					<image src="img/js.jpg"></image><br />
 					<ul>
 						<li>语法核心（ECMAScript）</li>
@@ -41,7 +41,7 @@
 				</section>
 				<section>
 					<section>
-						<h2 class="highlight">语法特征（ECMAScript 5）</h2>
+						<h3 class="highlight">语法特征（ECMAScript 5）</h3>
 						<h4>通过构造函数及原型继承实现类的封装</h4>
 						<pre><code>
 function People(name) {
@@ -87,7 +87,7 @@ abc(); // 2
 				</section>
 				<section>
           <section>
-            <h2 class="highlight">DOM && BOM</h2>
+            <h3 class="highlight">DOM && BOM</h3>
             <h4>DOM API</h4>
 						<pre><code>
 // query
@@ -122,7 +122,7 @@ document.attachEvent('click', function(e) {})
           </ul>
 				</section>
 				<section>
-					<h2 class="highlight">jQuery</h2>
+					<h3 class="highlight">jQuery</h3>
 						<h4>DOM(chainable)</h4>
             <pre><code>
 $('p.highlight').toggleClass('highlight').append($('#app'))
@@ -135,44 +135,46 @@ $('p.highlight').on('click', function() { /**/ })
 						<h4>Plugins</h4>
 				</section>
 				<section>
-					<h2 class="highlight">增加结构</h2>
+					<h3 class="highlight">增加结构</h3>
 				</section>
 				<section>
-					<h2 class="highlight">模块化</h2>
+					<h3 class="highlight">模块化</h3>
 				</section>
 				<section>
-					<h2 class="highlight">视图绑定</h2>
+					<section>
+						<h3 class="highlight">视图绑定</h3>
+						<h4>Angular Vue React</h4>
+						<image src="img/frameworks.png"></image>
+					</section>
+					<section>
+						<h4>实现思路</h4>
+						<ul>
+							<li>Watch 的实现</li>
+							<li>视图上的事件绑定</li>
+							<li>组件化</li>
+						</ul>
+					</section>
+					<section>
+						<image src="img/data.png"></image>
+					</section>
+				</section>
+				<section>
+					<h3 class="highlight">工程化</h3>
 					<ul>
-						<li>
-							Angular: dirty check
-						</li>
-						<li>
-							Vue: Object.defineProperty
-						</li>
-						<li>
-							React: Virtual DOM
-						</li>
+						<li>打包</li>
+						<li>压缩</li>
+						<li>合并</li>
 					</ul>
 				</section>
 				<section>
-					components
-				</section>
-				<section>
-					<ul>
-						<li>Native 混合开发：React Native | Cordova | NativeScript</li>
-						<li>跨平台桌面App 开发：Electron</li>
-						<li>游戏开发：Cocos2d js</li>
-					</ul>
-				</section>
-				<section>
-					Node.js
+					<h3 class="highlight">Node.js</h3>
 					<ul>
 						<li>commonjs</li>
 						<li>package</li>
 					</ul>
 				</section>
 				<section>
-					Compile to JS
+					<h3 class="highlight">Compile to JS</h3>
 					<ul>
 						<li>CoffeeScript</li>
 						<li>ES6</li>
