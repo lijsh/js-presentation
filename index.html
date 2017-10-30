@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>reveal.js</title>
+    <title>漫谈JavaScript</title>
 
     <link rel="stylesheet" href="css/reveal.css">
     <link rel="stylesheet" href="css/theme/league.css">
@@ -31,247 +31,186 @@
     <div class="reveal">
       <div class="slides">
         <section>
-          <h2 class="highlight">漫谈 JavaScript</h2>
+          <h2 class="highlight">JavaScript 中的函数队列</h2>
         </section>
         <section>
-          <h3 class="highlight">JavaScript 的实现</h3>
-          <image src="img/JS.jpg"></image><br />
+          <h3 class="highlight">队列的应用</h3>
           <ul>
-            <li>语法核心（ECMAScript）</li>
-            <li>文档对象模型（DOM）</li>
-            <li>浏览器对象模型（BOM）</li>
+            <li>拦截器</li>
+            <li>中间件</li>
+            <li>消息、缓存队列</li>
           </ul>
         </section>
         <section>
-          <section>
-            <h3 class="highlight">语法特征（ECMAScript 5）</h3>
-            <h4>通过构造函数及原型继承实现类的封装</h4>
+            <h3 class="highlight">最简单的示例</h3>
             <pre><code>
-function People(name) {
-  this.name = name
+var queue = [];
+
+function fn1() {
+  console.log('第一个调用');
 }
+queue.push(fn1);
 
-var people = new People('Jack');
+function fn2() {
+  console.log('第二个调用');
+}
+queue.push(fn2, function() {
+  console.log('第三个调用')
+});
 
-People.prototype.sayHi = function() {
-  console.log('Hello, my name is ' + this.name)
+queue.forEach(function(fn) {
+  fn()
+}); // 按顺序输出'第一个调用'、'第二个调用'、'第三个调用'
+            </code></pre>
+        </section>
+        <section>
+          <section>
+            <h3 class="highlight">考虑异步</h3>
+            <h4>JavaScript 中的异步</h4>
+            <pre><code>
+console.log(1);
+
+setTimeout(function() {
+    console.log(2);
+}, 0);
+
+console.log(3);
+            </code></pre>
+          </section>
+          <section>
+            <pre><code>
+var stack = [];
+
+function fn1() { console.log('第一个调用') };
+stack.push(fn1);
+
+function fn2() {
+    setTimeout(function fn2Timeout() {
+         console.log('第二个调用');
+    }, 0);
+}
+stack.push(fn2, function() { console.log('第三个调用') });
+
+stack.forEach(function(fn) { fn() }); // 输出'第一个调用'、'第三个调用'、'第二个调用'
+            </code></pre>      
+          </section>
+          <section>
+            <h3 class="highlight">异步结束的时间点掌握在回调中</h3>
+            <pre><code>
+function fn2() {
+    setTimeout(function fn2Timeout() {
+        console.log('第二个调用');
+        // 回调已调用完毕，可以执行下一个函数
+        // doSomething();
+    }, 0);
+}
+            </code></pre> 
+          </section>
+        </section>
+        <section>
+          <section>
+            <h3 class="highlight">next() </h3>
+            <pre><code>
+var index = 0;
+
+function next() {
+    var fn = stack[index];
+    index = index + 1; // 其实也可以用shift 把fn 拿出来
+    if (typeof fn === 'function') fn();
+}
+              </code></pre>
+          </section>
+          <section>
+            <h3 class="highlight">solution</h3>
+            <pre><code>
+var stack = [];
+
+// 定义index 和next
+
+function fn1() {
+    console.log('第一个调用');
+    next();  // stack 中每一个函数都必须调用`next`
 };
+stack.push(fn1);
 
-people.sayHi(); // log 'Hello, my name is Jack'
-              </code></pre>
-          </section>
-          <section>
-            <h4>非常灵活，支持lambda 函数、闭包甚至元编程特性</h4>
-              <pre><code>
-var abc = (function($, window, undefined) {
-  var count = 0
-  return function() {
-    count++
-    return count
-  }
-}(jQuery, this));
-
-abc(); // 1
-abc(); // 2
-              </code></pre>			
-          </section>
-          <section>
-            <h4>没有模块化（因此没有命名空间）</h4>
-              <pre><code>
-// a.js
-var helper = function() { /*...*/ };
-
-// b.js
-var helper = 'change helper';
-
-// c.js
-helper(); // 报错，helper 不是方法
-              </code></pre>		
-          </section>
-        </section>
-        <section>
-          <section>
-            <h3 class="highlight">DOM & BOM</h3>
-            <h4>DOM API</h4>
-            <pre><code>
-// query
-<div id="app">
-  <p class="highlight">some text</p>
-  <p class="highlight">more text</p>
-</div>
-document.getElementsByTagName('p')[0]
-document.getElementsByClassName('highlight')[0]
-document.querySelector('#app p.highlight')
-
-// 节点关系 childNode、parentNode、nextSibling 等
-// 修改节点 appendChild、insertBefore、replaceChild 等方法
-
-              </code></pre>      
-          </section>
-          <section>
-            <h4>Event</h4>
-              <pre><code>
-document.addEventListener('click', function(e) {
-  console.log(e.target);
-  console.log(e.currentTarget);
-  e.preventDefault();
-  e.stopPropagation();
-})
-// IE8 及以下
-document.attachEvent('click', function(e) {})
-              </code></pre>
-          </section>
-          <section>
-            <h4>BOM</h4>
-            <b>window</b>
-            <br>
-            <ul>
-              <li>
-                <span class="highlight">alert</span>/
-                <span class="highlight">prompt</span>/
-                <span class="highlight">confirm</span>
-              </li>
-              <li>
-                <span class="highlight">setTimeout</span>/
-                <span class="highlight">setInterval</span>
-              </li>
-              <li>
-                <span class="highlight">navigator</span>
-              </li>
-              <li><span class="highlight">history</span></li>
-              <li><span class="highlight">location</span></li>
-              <li><span class="highlight">frame</span></li>
-            </ul>
-            
-            
-            
-            
-          </section>
-          </ul>
-        </section>
-        <section>
-          <h3 class="highlight">jQuery</h3>
-            <h4>DOM(chainable)</h4>
-            <pre><code>
-$('p.highlight').toggleClass('highlight').append($('#app'))
-            </code></pre>
-            <h4>event</h4>
-            <pre><code>
-$('p.highlight').on('click', function() { /**/ })
-            </code></pre>
-            <h4>Utils</h4>
-            <h4>Plugins</h4>
-        </section>
-        <section>
-          <section>
-          <h3 class="highlight">增加结构</h3>
-            <h4>面条式的jQuery 代码</h4>
-            <pre><code>
-$('input[name="payment"]').click(function(){
-  if($('input[name="payment"]:checked').val()=='当前缴费额'){
-    $('.step-9 .js_donorsform').parent().show();
-    $('.donorsform fieldset').show();
-    $('.donorsform fieldset input').removeAttr('disabled');
-    donationamount();
-  }else{
-    $('#os_form').validationEngine('hideAll');
-    $('.step-9 .js_donorsform').parent().hide();
-    $('.donorsform fieldset').hide();
-    $('.donorsform fieldset input')
-      .attr('disabled','disabled');
-    $('#DonationAmount').val('0');
-    DonationAmountTMP();
-  }
-  $('.donorsform-row td[class*="js_donorsform"]').html('');
-  $('div.sectionwrap').css('height',
-    $('.donorsform').parent().outerHeight()
-  );
+function fn2() {
+    setTimeout(function fn2Timeout() {
+         console.log('第二个调用');
+         next();  // 调用`next`
+    }, 0);
+}
+stack.push(fn2, function() {
+    console.log('第三个调用');
+    next(); // 最后一个可以不调用，调用也没用。
 });
+
+next(); // 调用next，最终按顺序输出'第一个调用'、'第二个调用'、'第三个调用'。  
+            </code></pre>
+          </section>
+        </section>
+          <section>
+            <section>
+              <h3 class="highlight">Express 中的中间件</h3>
+              <pre><code>
+var app = express();
+
+// 没有挂载路径的中间件，应用的每个请求都会执行该中间件
+app.use(function (req, res, next) {
+  console.log('Time:', Date.now());
+  next();
+});
+
+// 挂载至 /user/:id 的中间件，任何指向 /user/:id 的请求都会执行它
+app.use('/user/:id', function (req, res, next) {
+  console.log('Request Type:', req.method);
+  next();
+});
+
+// 路由和句柄函数(中间件系统)，处理指向 /user/:id 的 GET 请求
+app.get('/user/:id', function (req, res, next) {
+  res.send('USER');
+});  
+              </code></pre>
+            </section>
+            <section>
+              <h3 class="highlight">Jest 中的异步代码测试</h3>
+              <pre><code>
+test('the data is peanut butter', done => {
+  function callback(data) {
+    expect(data).toBe('peanut butter');
+    done();
+  }
+
+  fetchData(callback);
+});  
+              </code></pre>
+            </section>
+          </section>
+        <section>
+          <section>
+            <h3 class="highlight">其它实现方式</h3>
+          </section>
+          <section>
+            <h3 class="highlight">compose</h3>
+            <pre><code>
+export default function compose(...funcs) {
+  if (funcs.length === 0) {
+    return arg => arg
+  }
+
+  if (funcs.length === 1) {
+    return funcs[0]
+  }
+
+  return funcs.reduce((a, b) => (...args) => a(b(...args)))
+} 
+
+// [f1, f2, f3]; f1(f2(f3()))
             </code></pre>
           </section>
           <section>
-            MV* 结构
-            <image src="img/intro-model-view.svg"></image>
-            <div class="flex-box">
-              <div class="flex-50">
-                <b>Model</b>
-                <ul>
-                  <li>从Server 获取数据</li>
-                  <li>处理业务逻辑</li>
-                  <li>触发事件</li>
-                </ul>
-              </div>
-              <div class="flex-50">
-                <b>View</b>
-                <ul>
-                  <li>根据Model 渲染视图</li>
-                  <li>监听交互事件</li>
-                  <li>触发业务处理逻辑</li>
-                </ul>
-              </div>
-            </div>
+            <h3 class="highlight">Generator、Async/Await</h3>
           </section>
-          <section>
-            <h4>Solution By Backbone.js</h4>
-            <pre><code>
-var DocumentRow = Backbone.View.extend({
-  tagName: "li",
-  className: "document-row",
-  events: {
-    "click .icon":          "open",
-    "click .button.delete": "destroy"
-  },
-  initialize: function() {
-    this.listenTo(this.model, "change", this.render);
-  },
-  render: function() {/*...*/},
-  oep: function () {/*...*/},
-  destroy: function () {/*...*/}
-});
-              </code></pre>
-          </section>
-        </section>
-        <section>
-          <section>
-            <h3 class="highlight">视图绑定</h3>
-            <h4>Angular Vue React</h4>
-            <image src="img/frameworks.png"></image>
-          </section>
-          <section>
-            <h4>实现思路</h4>
-            <ul>
-              <li>Watch 的实现</li>
-              <li>视图上的事件绑定</li>
-            </ul>
-          </section>
-          <section>
-            <image src="img/data.png"></image>
-          </section>
-        </section>
-        <section>
-          <section>
-            <h3 class="highlight">组件化</h3>
-            <image src="img/component.png"></image>
-          </section>
-          <section>
-            <ul>
-              <li>组件是一个完全独立的单元，可以有自己的状态</li>
-              <li>小组件组合成大组件，大组件为小组件注入属性及回调</li>
-              <li>最佳实践：状态由顶层容器元素维护，表现组件只负责获取属性然后渲染</li>
-            </ul>
-          </section>
-          <section>
-            <image src="img/vue.png"></image>
-          </section>
-        </section>
-        <section>
-          <h3 class="highlight">工程化</h3>
-          <ul>
-            <li>包管理</li>
-            <li>预编译</li>
-            <li>模块化</li>
-            <li>压缩、合并及打包</li>
-          </ul>
         </section>
         <section>
           Thanks!

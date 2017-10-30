@@ -1,0 +1,298 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>漫谈JavaScript</title>
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/league.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+    <style>
+      .reveal .highlight { color: #13DAEC }
+      .flex-box { display: flex; justify-content: center; align-items: center; }
+      .flex-50 { flex: 1; }
+      .flex-50 b { display: block; }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2 class="highlight">漫谈 JavaScript</h2>
+        </section>
+        <section>
+          <h3 class="highlight">JavaScript 的实现</h3>
+          <image src="img/JS.jpg"></image><br />
+          <ul>
+            <li>语法核心（ECMAScript）</li>
+            <li>文档对象模型（DOM）</li>
+            <li>浏览器对象模型（BOM）</li>
+          </ul>
+        </section>
+        <section>
+          <section>
+            <h3 class="highlight">语法特征（ECMAScript 5）</h3>
+            <h4>通过构造函数及原型继承实现类的封装</h4>
+            <pre><code>
+function People(name) {
+  this.name = name
+}
+
+var people = new People('Jack');
+
+People.prototype.sayHi = function() {
+  console.log('Hello, my name is ' + this.name)
+};
+
+people.sayHi(); // log 'Hello, my name is Jack'
+              </code></pre>
+          </section>
+          <section>
+            <h4>非常灵活，支持lambda 函数、闭包甚至元编程特性</h4>
+              <pre><code>
+var abc = (function($, window, undefined) {
+  var count = 0
+  return function() {
+    count++
+    return count
+  }
+}(jQuery, this));
+
+abc(); // 1
+abc(); // 2
+              </code></pre>			
+          </section>
+          <section>
+            <h4>没有模块化（因此没有命名空间）</h4>
+              <pre><code>
+// a.js
+var helper = function() { /*...*/ };
+
+// b.js
+var helper = 'change helper';
+
+// c.js
+helper(); // 报错，helper 不是方法
+              </code></pre>		
+          </section>
+        </section>
+        <section>
+          <section>
+            <h3 class="highlight">DOM & BOM</h3>
+            <h4>DOM API</h4>
+            <pre><code>
+// query
+<div id="app">
+  <p class="highlight">some text</p>
+  <p class="highlight">more text</p>
+</div>
+document.getElementsByTagName('p')[0]
+document.getElementsByClassName('highlight')[0]
+document.querySelector('#app p.highlight')
+
+// 节点关系 childNode、parentNode、nextSibling 等
+// 修改节点 appendChild、insertBefore、replaceChild 等方法
+
+              </code></pre>      
+          </section>
+          <section>
+            <h4>Event</h4>
+              <pre><code>
+document.addEventListener('click', function(e) {
+  console.log(e.target);
+  console.log(e.currentTarget);
+  e.preventDefault();
+  e.stopPropagation();
+})
+// IE8 及以下
+document.attachEvent('click', function(e) {})
+              </code></pre>
+          </section>
+          <section>
+            <h4>BOM</h4>
+            <b>window</b>
+            <br>
+            <ul>
+              <li>
+                <span class="highlight">alert</span>/
+                <span class="highlight">prompt</span>/
+                <span class="highlight">confirm</span>
+              </li>
+              <li>
+                <span class="highlight">setTimeout</span>/
+                <span class="highlight">setInterval</span>
+              </li>
+              <li>
+                <span class="highlight">navigator</span>
+              </li>
+              <li><span class="highlight">history</span></li>
+              <li><span class="highlight">location</span></li>
+              <li><span class="highlight">frame</span></li>
+            </ul>
+            
+            
+            
+            
+          </section>
+          </ul>
+        </section>
+        <section>
+          <h3 class="highlight">jQuery</h3>
+            <h4>DOM(chainable)</h4>
+            <pre><code>
+$('p.highlight').toggleClass('highlight').append($('#app'))
+            </code></pre>
+            <h4>event</h4>
+            <pre><code>
+$('p.highlight').on('click', function() { /**/ })
+            </code></pre>
+            <h4>Utils</h4>
+            <h4>Plugins</h4>
+        </section>
+        <section>
+          <section>
+          <h3 class="highlight">增加结构</h3>
+            <h4>面条式的jQuery 代码</h4>
+            <pre><code>
+$('input[name="payment"]').click(function(){
+  if($('input[name="payment"]:checked').val()=='当前缴费额'){
+    $('.step-9 .js_donorsform').parent().show();
+    $('.donorsform fieldset').show();
+    $('.donorsform fieldset input').removeAttr('disabled');
+    donationamount();
+  }else{
+    $('#os_form').validationEngine('hideAll');
+    $('.step-9 .js_donorsform').parent().hide();
+    $('.donorsform fieldset').hide();
+    $('.donorsform fieldset input')
+      .attr('disabled','disabled');
+    $('#DonationAmount').val('0');
+    DonationAmountTMP();
+  }
+  $('.donorsform-row td[class*="js_donorsform"]').html('');
+  $('div.sectionwrap').css('height',
+    $('.donorsform').parent().outerHeight()
+  );
+});
+            </code></pre>
+          </section>
+          <section>
+            MV* 结构
+            <image src="img/intro-model-view.svg"></image>
+            <div class="flex-box">
+              <div class="flex-50">
+                <b>Model</b>
+                <ul>
+                  <li>从Server 获取数据</li>
+                  <li>处理业务逻辑</li>
+                  <li>触发事件</li>
+                </ul>
+              </div>
+              <div class="flex-50">
+                <b>View</b>
+                <ul>
+                  <li>根据Model 渲染视图</li>
+                  <li>监听交互事件</li>
+                  <li>触发业务处理逻辑</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+          <section>
+            <h4>Solution By Backbone.js</h4>
+            <pre><code>
+var DocumentRow = Backbone.View.extend({
+  tagName: "li",
+  className: "document-row",
+  events: {
+    "click .icon":          "open",
+    "click .button.delete": "destroy"
+  },
+  initialize: function() {
+    this.listenTo(this.model, "change", this.render);
+  },
+  render: function() {/*...*/},
+  oep: function () {/*...*/},
+  destroy: function () {/*...*/}
+});
+              </code></pre>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h3 class="highlight">视图绑定</h3>
+            <h4>Angular Vue React</h4>
+            <image src="img/frameworks.png"></image>
+          </section>
+          <section>
+            <h4>实现思路</h4>
+            <ul>
+              <li>Watch 的实现</li>
+              <li>视图上的事件绑定</li>
+            </ul>
+          </section>
+          <section>
+            <image src="img/data.png"></image>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h3 class="highlight">组件化</h3>
+            <image src="img/component.png"></image>
+          </section>
+          <section>
+            <ul>
+              <li>组件是一个完全独立的单元，可以有自己的状态</li>
+              <li>小组件组合成大组件，大组件为小组件注入属性及回调</li>
+              <li>最佳实践：状态由顶层容器元素维护，表现组件只负责获取属性然后渲染</li>
+            </ul>
+          </section>
+          <section>
+            <image src="img/vue.png"></image>
+          </section>
+        </section>
+        <section>
+          <h3 class="highlight">工程化</h3>
+          <ul>
+            <li>包管理</li>
+            <li>预编译</li>
+            <li>模块化</li>
+            <li>压缩、合并及打包</li>
+          </ul>
+        </section>
+        <section>
+          Thanks!
+        </section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+    <script>
+      // More info https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        history: true,
+
+        // More info https://github.com/hakimel/reveal.js#dependencies
+        dependencies: [
+          { src: 'plugin/notes/notes.js', async: true },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
+</html>
